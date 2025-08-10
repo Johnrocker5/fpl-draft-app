@@ -14,6 +14,8 @@ const socket = io('https://fpl-draft-app.onrender.com', {
   reconnectionDelay: 1000
 });
 
+console.log('Socket.IO connecting to:', 'https://fpl-draft-app.onrender.com'); // Add this line
+
 class ErrorBoundary extends React.Component {
   state = { error: null };
   static getDerivedStateFromError(error) {
