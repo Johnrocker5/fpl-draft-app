@@ -40,7 +40,7 @@ const DraftRoom = ({ user, draftState, socket }) => {
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/players', { timeout: 5000 });
+        const response = await axios.get('https://fpl-draft-app.onrender.com/api/players', { timeout: 5000 });
         setPlayers(response.data);
         setError(null);
       } catch (err) {
@@ -54,7 +54,7 @@ const DraftRoom = ({ user, draftState, socket }) => {
   useEffect(() => {
     const fetchManagers = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/managers', { timeout: 5000 });
+        const response = await axios.get('https://fpl-draft-app.onrender.com/api/managers', { timeout: 5000 });
         setManagers(response.data);
         setError(null);
       } catch (err) {
@@ -68,7 +68,7 @@ const DraftRoom = ({ user, draftState, socket }) => {
   useEffect(() => {
     const fetchManager = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/managers/${user.uid}`, { timeout: 5000 });
+        const response = await axios.get(`https://fpl-draft-app.onrender.com/api/managers/${user.uid}`, { timeout: 5000 });
         setManager(response.data);
         setError(null);
       } catch (err) {
@@ -83,7 +83,7 @@ const DraftRoom = ({ user, draftState, socket }) => {
     const fetchCurrentManager = async () => {
       if (draftState.managerOrder && draftState.managerOrder.length > 0 && draftState.currentTurn >= 0) {
         try {
-          const response = await axios.get(`http://localhost:3000/api/managers/${draftState.managerOrder[draftState.currentTurn]}`, { timeout: 5000 });
+          const response = await axios.get(`https://fpl-draft-app.onrender.com/api/managers/${draftState.managerOrder[draftState.currentTurn]}`, { timeout: 5000 });
           setCurrentManager(response.data);
           setError(null);
         } catch (err) {
@@ -99,7 +99,7 @@ const DraftRoom = ({ user, draftState, socket }) => {
       if (draftState.managerOrder && draftState.managerOrder.length > 0 && draftState.currentTurn >= 0) {
         const nextIndex = (draftState.currentTurn + 1) % draftState.managerOrder.length;
         try {
-          const response = await axios.get(`http://localhost:3000/api/managers/${draftState.managerOrder[nextIndex]}`, { timeout: 5000 });
+          const response = await axios.get(`https://fpl-draft-app.onrender.com/api/managers/${draftState.managerOrder[nextIndex]}`, { timeout: 5000 });
           setNextManager(response.data);
           setError(null);
         } catch (err) {

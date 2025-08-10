@@ -27,7 +27,7 @@ const DraftDashboard = ({ user, draftState, socket }) => {
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/players', { timeout: 5000 });
+        const response = await axios.get('https://fpl-draft-app.onrender.com/api/players', { timeout: 5000 });
         setPlayers(response.data.sort((a, b) => b.now_cost - a.now_cost));
         setError(null);
       } catch (err) {
@@ -41,7 +41,7 @@ const DraftDashboard = ({ user, draftState, socket }) => {
   useEffect(() => {
     const fetchManager = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/managers/${user.uid}`, { timeout: 5000 });
+        const response = await axios.get(`https://fpl-draft-app.onrender.com/api/managers/${user.uid}`, { timeout: 5000 });
         setManager(response.data);
         setError(null);
       } catch (err) {

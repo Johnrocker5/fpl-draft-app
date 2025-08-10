@@ -12,8 +12,9 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:3001',
-    methods: ['GET', 'POST']
+    origin: process.env.CLIENT_URL || 'https://fpl-draft-app.onrender.com', // Update to frontend's deployed URL
+    methods: ['GET', 'POST'],
+    credentials: true // Allow credentials if needed for auth
   }
 });
 
@@ -32,7 +33,10 @@ admin.initializeApp({
 });
 
 // Middleware
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:3001' }));
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'https://fpl-draft-app.onrender.com', // Update to frontend's deployed URL
+  credentials: true // Allow credentials if needed
+}));
 app.use(express.json());
 app.use('/api', apiRoutes);
 

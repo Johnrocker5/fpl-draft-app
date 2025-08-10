@@ -8,7 +8,7 @@ import MyTeam from './components/MyTeam';
 import ManagersTeams from './components/ManagersTeams';
 import './index.css';
 
-const socket = io('http://localhost:3000', {
+const socket = io('https://fpl-draft-app.onrender.com', {
   reconnection: true,
   reconnectionAttempts: 5,
   reconnectionDelay: 1000

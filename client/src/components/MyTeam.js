@@ -9,7 +9,7 @@ const MyTeam = ({ user, draftState }) => {
   useEffect(() => {
     const fetchManager = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/managers/${user.uid}`, { timeout: 5000 });
+        const response = await axios.get(`https://fpl-draft-app.onrender.com/api/managers/${user.uid}`, { timeout: 5000 });
         setManager(response.data);
         setError(null);
       } catch (err) {
@@ -20,10 +20,10 @@ const MyTeam = ({ user, draftState }) => {
 
     const fetchDraftedPlayers = async () => {
       try {
-        const managerResponse = await axios.get(`http://localhost:3000/api/managers/${user.uid}`, { timeout: 5000 });
+        const managerResponse = await axios.get(`https://fpl-draft-app.onrender.com/api/managers/${user.uid}`, { timeout: 5000 });
         const playerIds = managerResponse.data.playersOwned || [];
         if (playerIds.length > 0) {
-          const response = await axios.post('http://localhost:3000/api/players/multiple', { ids: playerIds }, { timeout: 5000 });
+          const response = await axios.post('https://fpl-draft-app.onrender.com/api/players/multiple', { ids: playerIds }, { timeout: 5000 });
           setPlayers(response.data);
         } else {
           setPlayers([]);
