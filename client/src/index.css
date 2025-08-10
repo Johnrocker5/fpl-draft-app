@@ -1,0 +1,15 @@
+/* client/src/index.css */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+}
+
+.list-group-item:empty {
+  border: 1px solid #dee2e6; /* Matches Bootstrap list-group border */
+  height: 38px; /* Matches typical list-group-item height */
+}

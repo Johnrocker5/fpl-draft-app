@@ -1,0 +1,13 @@
+# Sensitive files
+backend/config/firebase.json
+backend/.env
+client/.env
+# Node dependencies
+node_modules/
+# Lockfiles
+client/package-lock.json
+# IDE and misc
+.idea/
+venv/
+# macOS system files
+.DS_Store
