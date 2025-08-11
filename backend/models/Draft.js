@@ -1,18 +1,13 @@
 const mongoose = require('mongoose');
 
 const DraftSchema = new mongoose.Schema({
-  status: String,
+  status: { type: String, default: 'pending' },
   managerOrder: [String],
-  currentTurn: Number,
+  currentTurn: { type: Number, default: 0 },
   currentPlayer: String,
-  currentBid: Number,
+  currentBid: { type: Number, default: 0 },
   highestBidder: String,
-  timer: Number,
-  totalPicks: Number,
-  nominationTime: { type: Number, default: 30 }, // Time for nomination (seconds)
-  auctionTime: { type: Number, default: 30 },  // Time for bidding (seconds)
-  minRespondTime: { type: Number, default: 15 }, // Min time after bid (seconds)
-  reliefTime: { type: Number, default: 3 }    // Time before next turn (seconds)
+  timer: { type: Number, default: 30 }
 });
 
 module.exports = mongoose.model('Draft', DraftSchema);
