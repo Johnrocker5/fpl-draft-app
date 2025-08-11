@@ -11,7 +11,6 @@ const DraftRoom = ({ user, draftState, socket }) => {
   const [nomination, setNomination] = useState('');
   const [error, setError] = useState(null);
   const [currentManager, setCurrentManager] = useState(null);
-  const [nextManager, setNextManager] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showStartConfirm, setShowStartConfirm] = useState(false);
   const [showPauseConfirm, setShowPauseConfirm] = useState(false);
@@ -21,7 +20,6 @@ const DraftRoom = ({ user, draftState, socket }) => {
   const [showRestartConfirm, setShowRestartConfirm] = useState(false);
   const [reliefTime, setReliefTime] = useState(0);
   const [showReliefPopup, setShowReliefPopup] = useState(false);
-  const [reliefState, setReliefState] = useState({ currentNominator: null, currentPlayer: null });
 
   const positionLimits = { GKP: 2, DEF: 5, MID: 5, FWD: 3 };
 
@@ -48,8 +46,8 @@ const DraftRoom = ({ user, draftState, socket }) => {
         setPlayers(response.data);
         setError(null);
       } catch (err) {
-        console.error('Player fetch error:', err, 'Response:', err.response);
-        setError(`Failed to fetch players: ${err.message}${err.response ? ` (Status: ${err.response.status}, Data: ${JSON.stringify(err.response.data)})` : ''}`);
+        console.error('Player fetch error:', err);
+        setError(`Failed to fetch players: ${err.message}`);
       }
     };
     fetchPlayers();
@@ -62,8 +60,8 @@ const DraftRoom = ({ user, draftState, socket }) => {
         setManagers(response.data);
         setError(null);
       } catch (err) {
-        console.error('Manager fetch error:', err, 'Response:', err.response);
-        setError(`Failed to fetch managers: ${err.message}${err.response ? ` (Status: ${err.response.status}, Data: ${JSON.stringify(err.response.data)})` : ''}`);
+        console.error('Manager fetch error:', err);
+        setError(`Failed to fetch managers: ${err.message}`);
       }
     };
     fetchManagers();
@@ -76,8 +74,8 @@ const DraftRoom = ({ user, draftState, socket }) => {
         setManager(response.data);
         setError(null);
       } catch (err) {
-        console.error('Manager fetch error:', err, 'Response:', err.response);
-        setError(`Failed to fetch manager data: ${err.message}${err.response ? ` (Status: ${err.response.status}, Data: ${JSON.stringify(err.response.data)})` : ''}`);
+        console.error('Manager fetch error:', err);
+        setError(`Failed to fetch manager data: ${err.message}`);
       }
     };
     fetchManager();
@@ -91,39 +89,20 @@ const DraftRoom = ({ user, draftState, socket }) => {
           setCurrentManager(response.data);
           setError(null);
         } catch (err) {
-          console.error('Current manager fetch error:', err, 'Response:', err.response);
-          setError(`Failed to fetch current manager: ${err.message}${err.response ? ` (Status: ${err.response.status}, Data: ${JSON.stringify(err.response.data)})` : ''}`);
+          console.error('Current manager fetch error:', err);
+          setError(`Failed to fetch current manager: ${err.message}`);
         }
       } else {
-        console.log('Skipping current manager fetch: invalid managerOrder or currentTurn', draftState);
         setCurrentManager(null);
       }
     };
-    const fetchNextManager = async () => {
-      if (draftState.managerOrder && draftState.managerOrder.length > 0 && draftState.currentTurn >= 0) {
-        const nextIndex = (draftState.currentTurn + 1) % draftState.managerOrder.length;
-        try {
-          const response = await axios.get(`https://fpl-draft-app.onrender.com/api/managers/${draftState.managerOrder[nextIndex]}`, { timeout: 5000 });
-          setNextManager(response.data);
-          setError(null);
-        } catch (err) {
-          console.error('Next manager fetch error:', err, 'Response:', err.response);
-          setError(`Failed to fetch next manager: ${err.message}${err.response ? ` (Status: ${err.response.status}, Data: ${JSON.stringify(err.response.data)})` : ''}`);
-        }
-      } else {
-        console.log('Skipping next manager fetch: invalid managerOrder or currentTurn', draftState);
-        setNextManager(null);
-      }
-    };
     fetchCurrentManager();
-    fetchNextManager();
   }, [draftState.managerOrder, draftState.currentTurn]);
 
   useEffect(() => {
-    socket.on('reliefPeriod', ({ reliefTime, currentNominator, currentPlayer }) => {
-      console.log('Received reliefPeriod:', { reliefTime, currentNominator, currentPlayer });
+    socket.on('reliefPeriod', ({ reliefTime }) => {
+      console.log('Received reliefPeriod:', reliefTime);
       setReliefTime(reliefTime);
-      setReliefState({ currentNominator, currentPlayer });
       setShowReliefPopup(true);
       setTimeout(() => window.location.reload(), reliefTime * 1000); // Auto-refresh
     });
@@ -259,11 +238,6 @@ const DraftRoom = ({ user, draftState, socket }) => {
                 </div>
                 <div className="modal-body">
                   <p>Auto-refreshing, will close in {reliefTime} seconds.</p>
-                  <p>
-                    {reliefState.currentPlayer
-                      ? `Current player up for auction: ${reliefState.currentPlayer}`
-                      : `Next nominator: ${reliefState.currentNominator || 'Unknown'}`}
-                  </p>
                 </div>
               </div>
             </div>
@@ -280,9 +254,6 @@ const DraftRoom = ({ user, draftState, socket }) => {
                 <p><strong>Total Picks:</strong> {draftState.totalPicks}</p>
                 {currentManager && (
                   <p><strong>Current Turn:</strong> {currentManager.name}</p>
-                )}
-                {nextManager && (
-                  <p><strong>Next Turn:</strong> {nextManager.name}</p>
                 )}
                 {draftState.currentPlayer && (
                   <>

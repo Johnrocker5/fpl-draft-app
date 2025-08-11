@@ -18,8 +18,8 @@ function setupSockets(io) {
     totalPicks: 0,
     nominationTime: 30,
     auctionTime: 30,
-    minRespondTime: 15,
-    reliefTime: 3
+    minRespondTime: 15, // Updated to 15 seconds
+    reliefTime: 3       // Set to 3 seconds
   };
   let timerInterval = null;
 
@@ -85,17 +85,7 @@ function setupSockets(io) {
 
   async function startReliefPeriod(io) {
     draftState.timer = draftState.reliefTime;
-    // Calculate next turn's nominator
-    const nextTurn = draftState.status === 'active'
-      ? (draftState.currentTurn + 1) % draftState.managerOrder.length
-      : draftState.currentTurn;
-    const nominatorId = draftState.managerOrder[nextTurn];
-    const nominator = nominatorId ? await Manager.findById(nominatorId) : null;
-    io.emit('reliefPeriod', {
-      reliefTime: draftState.reliefTime,
-      currentNominator: nominator ? nominator.name : 'Unknown',
-      currentPlayer: draftState.currentPlayer ? draftState.currentPlayer.web_name : null
-    });
+    io.emit('reliefPeriod', { reliefTime: draftState.reliefTime });
     console.log(`Relief period started: ${draftState.reliefTime} seconds`);
     return new Promise(resolve => setTimeout(resolve, draftState.reliefTime * 1000));
   }
@@ -120,7 +110,7 @@ function setupSockets(io) {
         minRespondTime: 15,
         reliefTime: 3
       };
-      const managerUpdateResult = await Manager.updateMany(
+      await Manager.updateMany(
         {},
         {
           $set: {
@@ -131,10 +121,10 @@ function setupSockets(io) {
           }
         }
       );
-      console.log('Managers reset:', managerUpdateResult);
-      console.log('Fetching players from FPL API');
+      console.log('Managers reset');
+      await Player.deleteMany({});
+      console.log('Player collection cleared');
       const response = await axios.get('https://fantasy.premierleague.com/api/bootstrap-static/');
-      console.log('FPL API response received:', response.data.elements.length, 'players');
       const players = response.data.elements;
       const teams = response.data.teams.reduce((acc, team) => ({ ...acc, [team.id]: team.short_name }), {});
       const positions = response.data.element_types.reduce((acc, pos) => ({ ...acc, [pos.id]: pos.singular_name_short }), {});
@@ -148,18 +138,16 @@ function setupSockets(io) {
         now_cost: player.now_cost / 10,
         isDrafted: false,
         currentBid: 0,
-        highestBidder: null,
+        highestBidder: null
       }));
-      await Player.deleteMany({});
-      console.log('Player collection cleared');
-      const playerInsertResult = await Player.insertMany(playerData);
-      console.log('Players inserted:', playerInsertResult.length);
-      console.log('Draft, managers, and players reset successfully');
+      await Player.insertMany(playerData);
+      console.log('Players inserted:', playerData.length);
+      console.log('Draft reset successfully');
       io.emit('draftState', draftState);
+      await saveDraftState();
     } catch (err) {
       console.error('Error resetting draft:', err);
       io.emit('error', { message: 'Failed to reset draft: ' + err.message });
-      throw err;
     }
   }
 
@@ -191,7 +179,7 @@ function setupSockets(io) {
           draftState.currentPlayer = null;
           draftState.currentBid = 0;
           draftState.highestBidder = null;
-          console.log('Draft started by admin:', userId, 'Manager order:', draftState.managerOrder);
+          console.log('Draft started by admin:', userId);
           await saveDraftState();
           await startReliefPeriod(io);
           startTimer(io);
@@ -203,7 +191,6 @@ function setupSockets(io) {
 
       socket.on('restartDraft', async ({ userId }) => {
         try {
-          console.log('Received restartDraft event, userId:', userId);
           const user = await admin.auth().getUser(userId);
           if (!user.customClaims?.isAdmin) {
             socket.emit('error', { message: 'Unauthorized: Only admins can restart the draft' });
@@ -215,8 +202,7 @@ function setupSockets(io) {
             console.log('Timer stopped for draft reset');
           }
           await resetDraft();
-          console.log('Draft reset completed, emitting new draftState:', draftState);
-          await saveDraftState();
+          console.log('Draft reset completed');
         } catch (err) {
           console.error('Restart draft error:', err);
           socket.emit('error', { message: 'Failed to restart draft: ' + err.message });
@@ -269,7 +255,7 @@ function setupSockets(io) {
           draftState.currentBid = bid;
           draftState.highestBidder = userId;
           draftState.timer = Math.max(draftState.timer, draftState.minRespondTime);
-          console.log(`Bid placed: ${bid} by ${userId} on ${draftState.currentPlayer.web_name}, Timer reset to: ${draftState.timer}`);
+          console.log(`Bid placed: ${bid} by ${userId} on ${draftState.currentPlayer.web_name}`);
           await saveDraftState();
         } catch (err) {
           console.error('Bid error:', err);
@@ -290,7 +276,7 @@ function setupSockets(io) {
           }
           draftState.currentTurn = (draftState.currentTurn + 1) % draftState.managerOrder.length;
           draftState.timer = draftState.reliefTime;
-          console.log(`Turn skipped by admin: ${userId}, New turn: ${draftState.managerOrder[draftState.currentTurn]}`);
+          console.log(`Turn skipped by admin: ${userId}`);
           await saveDraftState();
           await startReliefPeriod(io);
           if (draftState.status === 'active' && !draftState.paused) {
@@ -317,7 +303,7 @@ function setupSockets(io) {
           timerInterval = null;
           await allocatePlayer();
           draftState.totalPicks += 1;
-          console.log(`Bid closed by admin: ${userId}, Player: ${draftState.currentPlayer.web_name}, Total picks: ${draftState.totalPicks}`);
+          console.log(`Bid closed by admin: ${userId}, Total picks: ${draftState.totalPicks}`);
           if (await checkDraftComplete()) {
             draftState.status = 'completed';
             draftState.paused = false;
@@ -409,7 +395,7 @@ function setupSockets(io) {
                 draftState.timer = 0;
                 clearInterval(timerInterval);
                 timerInterval = null;
-                console.log('Draft completed: All managers have 15 players');
+                console.log('Draft completed');
                 await saveDraftState();
                 return;
               }
@@ -502,11 +488,11 @@ function setupSockets(io) {
             draftState.status = 'completed';
             draftState.paused = false;
             draftState.timer = 0;
-            console.log('Draft completed: All managers have 15 players');
+            console.log('Draft completed');
             clearInterval(timerInterval);
             timerInterval = null;
           }
-          console.log(`Next turn: Manager ${draftState.managerOrder[draftState.currentTurn]}, Timer: ${draftState.timer}`);
+          console.log(`Next turn: Manager ${draftState.managerOrder[draftState.currentTurn]}`);
           await saveDraftState();
           if (draftState.status === 'active' && !draftState.paused) {
             startTimer(io);
