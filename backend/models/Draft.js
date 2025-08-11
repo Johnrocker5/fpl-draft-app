@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const draftSchema = new mongoose.Schema({
+const DraftSchema = new mongoose.Schema({
   status: String,
   managerOrder: [String],
   currentTurn: Number,
