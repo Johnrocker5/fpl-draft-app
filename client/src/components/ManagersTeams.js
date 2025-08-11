@@ -3,118 +3,95 @@ import axios from 'axios';
 
 const ManagersTeams = ({ user, draftState }) => {
   const [managers, setManagers] = useState([]);
-  const [players, setPlayers] = useState([]);
-  const [selectedManagerId, setSelectedManagerId] = useState('');
+  const [playersMap, setPlayersMap] = useState({});
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchManagers = async () => {
+    const fetchManagersAndPlayers = async () => {
       try {
-        const response = await axios.get('https://fpl-draft-app.onrender.com/api/managers', { timeout: 5000 });
-        setManagers(response.data);
+        const managersResponse = await axios.get('https://fpl-draft-app.onrender.com/api/managers', { timeout: 5000 });
+        const managersData = managersResponse.data;
+        setManagers(managersData);
+
+        const allPlayerIds = managersData.flatMap(manager => manager.playersOwned || []);
+        if (allPlayerIds.length > 0) {
+          const playersResponse = await axios.post(
+            'https://fpl-draft-app.onrender.com/api/players/multiple',
+            { ids: allPlayerIds },
+            { timeout: 5000 }
+          );
+          const players = playersResponse.data;
+          const playersById = players.reduce((acc, player) => {
+            acc[player._id] = player;
+            return acc;
+          }, {});
+          setPlayersMap(playersById);
+        } else {
+          setPlayersMap({});
+        }
         setError(null);
       } catch (err) {
-        console.error('Manager fetch error:', err);
-        setError(`Failed to fetch managers: ${err.message}${err.response ? ` (Status: ${err.response.status})` : ''}`);
+        console.error('ManagersTeams fetch error:', err, 'Response:', err.response);
+        setError(`Failed to fetch managers' teams: ${err.message}${err.response ? ` (Status: ${err.response.status}, Data: ${JSON.stringify(err.response.data)})` : ''}`);
       }
     };
-    fetchManagers();
-  }, []);
-
-  useEffect(() => {
-    const fetchDraftedPlayers = async () => {
-      if (selectedManagerId) {
-        try {
-          const managerResponse = await axios.get(`https://fpl-draft-app.onrender.com/api/managers/${selectedManagerId}`, { timeout: 5000 });
-          const playerIds = managerResponse.data.playersOwned || [];
-          if (playerIds.length > 0) {
-            const response = await axios.post('https://fpl-draft-app.onrender.com/api/players/multiple', { ids: playerIds }, { timeout: 5000 });
-            setPlayers(response.data);
-          } else {
-            setPlayers([]);
-          }
-          setError(null);
-        } catch (err) {
-          console.error('Player fetch error:', err);
-          setError(`Failed to fetch players: ${err.message}${err.response ? ` (Status: ${err.response.status})` : ''}`);
-        }
-      } else {
-        setPlayers([]);
-      }
-    };
-    fetchDraftedPlayers();
-  }, [selectedManagerId, draftState.totalPicks]);
-
-  const positionLimits = { GKP: 2, DEF: 5, MID: 5, FWD: 3 };
-
-  const renderPositionSlots = (manager, position) => {
-    const ownedPlayers = players.filter(player => player?.position === position) || [];
-    const slots = [];
-    for (let i = 0; i < positionLimits[position]; i++) {
-      if (i < ownedPlayers.length) {
-        const player = ownedPlayers[i];
-        slots.push(
-          <li key={player._id} className="list-group-item">
-            {player.web_name} ({player.team})
-          </li>
-        );
-      } else {
-        slots.push(
-          <li key={`open-${manager._id}-${position}-${i}`} className="list-group-item"></li>
-        );
-      }
-    }
-    return slots;
-  };
-
-  const selectedManager = managers.find(m => m._id === selectedManagerId);
+    fetchManagersAndPlayers();
+  }, [draftState.status, draftState.totalPicks]);
 
   return (
-    <div className="card p-4">
-      <h2 className="card-title text-primary mb-4">Managers' Teams</h2>
-      {error && (
-        <div className="alert alert-danger" role="alert">{error}</div>
-      )}
-      <div className="mb-3">
-        <label htmlFor="managerFilter" className="form-label">Select Manager</label>
-        <select
-          id="managerFilter"
-          value={selectedManagerId}
-          onChange={(e) => setSelectedManagerId(e.target.value)}
-          className="form-select"
-        >
-          <option value="">Select a manager</option>
-          {managers.map(manager => (
-            <option key={manager._id} value={manager._id}>{manager.name}</option>
-          ))}
-        </select>
+    <div className="container py-4">
+      <div className="card p-4">
+        <h2 className="card-title text-primary mb-4">Managers' Teams</h2>
+        {error && <div className="alert alert-danger">{error}</div>}
+        {managers.length > 0 ? (
+          managers.map(manager => (
+            <div key={manager._id} className="mb-4">
+              <h3 className="mb-3">{manager.name}'s Team</h3>
+              <p><strong>Budget:</strong> {manager.budget}</p>
+              <p><strong>Players Remaining:</strong> {manager.playersRequired}</p>
+              <p><strong>Position Counts:</strong></p>
+              <ul className="list-group mb-3">
+                <li className="list-group-item">GKP: {manager.positionCounts?.GKP || 0}/2</li>
+                <li className="list-group-item">DEF: {manager.positionCounts?.DEF || 0}/5</li>
+                <li className="list-group-item">MID: {manager.positionCounts?.MID || 0}/5</li>
+                <li className="list-group-item">FWD: {manager.positionCounts?.FWD || 0}/3</li>
+              </ul>
+              <h4 className="mb-3">Drafted Players</h4>
+              {manager.playersOwned && manager.playersOwned.length > 0 ? (
+                <div className="table-responsive">
+                  <table className="table table-bordered">
+                    <thead className="table-primary">
+                      <tr>
+                        <th>Position</th>
+                        <th>Name</th>
+                        <th>Team</th>
+                        <th>Auction Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {manager.playersOwned.map(playerId => {
+                        const player = playersMap[playerId];
+                        return player ? (
+                          <tr key={player._id}>
+                            <td>{player.position}</td>
+                            <td>{player.web_name}</td>
+                            <td>{player.team}</td>
+                            <td>{player.currentBid || 'N/A'}</td>
+                          </tr>
+                        ) : null;
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p>No players drafted yet.</p>
+              )}
+            </div>
+          ))
+        ) : (
+          <p>Loading managers' teams...</p>
+        )}
       </div>
-      {selectedManager ? (
-        <div>
-          <h3 className="card-title">{selectedManager.name}'s Team</h3>
-          <p><strong>Budget:</strong> R{selectedManager.budget}</p>
-          <p><strong>Players Required:</strong> {selectedManager.playersRequired}</p>
-          <h4 className="h5 mt-3">Roster</h4>
-          <div className="mb-3">
-            <h5>Goalkeepers (2 slots)</h5>
-            <ul className="list-group">{renderPositionSlots(selectedManager, 'GKP')}</ul>
-          </div>
-          <div className="mb-3">
-            <h5>Defenders (5 slots)</h5>
-            <ul className="list-group">{renderPositionSlots(selectedManager, 'DEF')}</ul>
-          </div>
-          <div className="mb-3">
-            <h5>Midfielders (5 slots)</h5>
-            <ul className="list-group">{renderPositionSlots(selectedManager, 'MID')}</ul>
-          </div>
-          <div className="mb-3">
-            <h5>Forwards (3 slots)</h5>
-            <ul className="list-group">{renderPositionSlots(selectedManager, 'FWD')}</ul>
-          </div>
-        </div>
-      ) : (
-        <p className="text-muted">Select a manager to view their team.</p>
-      )}
     </div>
   );
 };

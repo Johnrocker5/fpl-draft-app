@@ -7,92 +7,80 @@ const MyTeam = ({ user, draftState }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchManager = async () => {
-      try {
-        const response = await axios.get(`https://fpl-draft-app.onrender.com/api/managers/${user.uid}`, { timeout: 5000 });
-        setManager(response.data);
-        setError(null);
-      } catch (err) {
-        console.error('Manager fetch error:', err);
-        setError(`Failed to fetch manager data: ${err.message}${err.response ? ` (Status: ${err.response.status})` : ''}`);
-      }
-    };
-
-    const fetchDraftedPlayers = async () => {
+    const fetchManagerAndPlayers = async () => {
       try {
         const managerResponse = await axios.get(`https://fpl-draft-app.onrender.com/api/managers/${user.uid}`, { timeout: 5000 });
-        const playerIds = managerResponse.data.playersOwned || [];
-        if (playerIds.length > 0) {
-          const response = await axios.post('https://fpl-draft-app.onrender.com/api/players/multiple', { ids: playerIds }, { timeout: 5000 });
-          setPlayers(response.data);
+        const managerData = managerResponse.data;
+        setManager(managerData);
+
+        if (managerData.playersOwned && managerData.playersOwned.length > 0) {
+          const playersResponse = await axios.post(
+            'https://fpl-draft-app.onrender.com/api/players/multiple',
+            { ids: managerData.playersOwned },
+            { timeout: 5000 }
+          );
+          setPlayers(playersResponse.data);
         } else {
           setPlayers([]);
         }
         setError(null);
       } catch (err) {
-        console.error('Player fetch error:', err);
-        setError(`Failed to fetch players: ${err.message}${err.response ? ` (Status: ${err.response.status})` : ''}`);
+        console.error('MyTeam fetch error:', err, 'Response:', err.response);
+        setError(`Failed to fetch team data: ${err.message}${err.response ? ` (Status: ${err.response.status}, Data: ${JSON.stringify(err.response.data)})` : ''}`);
       }
     };
-
-    fetchManager();
-    fetchDraftedPlayers();
-  }, [user.uid, draftState.totalPicks]);
-
-  const positionLimits = { GKP: 2, DEF: 5, MID: 5, FWD: 3 };
-
-  const renderPositionSlots = (position) => {
-    const ownedPlayers = players.filter(player => player?.position === position) || [];
-    const slots = [];
-    for (let i = 0; i < positionLimits[position]; i++) {
-      if (i < ownedPlayers.length) {
-        const player = ownedPlayers[i];
-        slots.push(
-          <li key={player._id} className="list-group-item">
-            {player.web_name} ({player.team})
-          </li>
-        );
-      } else {
-        slots.push(
-          <li key={`open-${position}-${i}`} className="list-group-item"></li>
-        );
-      }
-    }
-    return slots;
-  };
+    fetchManagerAndPlayers();
+  }, [user.uid, draftState.status, draftState.totalPicks]);
 
   return (
-    <div className="card p-4">
-      <h2 className="card-title text-primary mb-4">My Team</h2>
-      {error && (
-        <div className="alert alert-danger" role="alert">{error}</div>
-      )}
-      {manager ? (
-        <div>
-          <h3 className="card-title">{manager.name}'s Team</h3>
-          <p><strong>Budget:</strong> R{manager.budget}</p>
-          <p><strong>Players Required:</strong> {manager.playersRequired}</p>
-          <h4 className="h5 mt-3">Roster</h4>
-          <div className="mb-3">
-            <h5>Goalkeepers (2 slots)</h5>
-            <ul className="list-group">{renderPositionSlots('GKP')}</ul>
-          </div>
-          <div className="mb-3">
-            <h5>Defenders (5 slots)</h5>
-            <ul className="list-group">{renderPositionSlots('DEF')}</ul>
-          </div>
-          <div className="mb-3">
-            <h5>Midfielders (5 slots)</h5>
-            <ul className="list-group">{renderPositionSlots('MID')}</ul>
-          </div>
-          <div className="mb-3">
-            <h5>Forwards (3 slots)</h5>
-            <ul className="list-group">{renderPositionSlots('FWD')}</ul>
-          </div>
-        </div>
-      ) : (
-        <p>Loading...</p>
-      )}
+    <div className="container py-4">
+      <div className="card p-4">
+        <h2 className="card-title text-primary mb-4">My Team</h2>
+        {error && <div className="alert alert-danger">{error}</div>}
+        {manager ? (
+          <>
+            <h3 className="mb-3">{manager.name}'s Team</h3>
+            <p><strong>Budget:</strong> {manager.budget}</p>
+            <p><strong>Players Remaining:</strong> {manager.playersRequired}</p>
+            <p><strong>Position Counts:</strong></p>
+            <ul className="list-group mb-3">
+              <li className="list-group-item">GKP: {manager.positionCounts?.GKP || 0}/2</li>
+              <li className="list-group-item">DEF: {manager.positionCounts?.DEF || 0}/5</li>
+              <li className="list-group-item">MID: {manager.positionCounts?.MID || 0}/5</li>
+              <li className="list-group-item">FWD: {manager.positionCounts?.FWD || 0}/3</li>
+            </ul>
+            <h4 className="mb-3">Drafted Players</h4>
+            {players.length > 0 ? (
+              <div className="table-responsive">
+                <table className="table table-bordered">
+                  <thead className="table-primary">
+                    <tr>
+                      <th>Position</th>
+                      <th>Name</th>
+                      <th>Team</th>
+                      <th>Auction Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {players.map(player => (
+                      <tr key={player._id}>
+                        <td>{player.position}</td>
+                        <td>{player.web_name}</td>
+                        <td>{player.team}</td>
+                        <td>{player.currentBid || 'N/A'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p>No players drafted yet.</p>
+            )}
+          </>
+        ) : (
+          <p>Loading team data...</p>
+        )}
+      </div>
     </div>
   );
 };
