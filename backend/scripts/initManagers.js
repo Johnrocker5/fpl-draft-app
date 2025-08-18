@@ -11,14 +11,21 @@ async function initManagers() {
     const managers = [
       { _id: 'O2Dim0NphuR5vacnpj4YKZFfTBd2', email: 'joshhjohnstone@gmail.com', name: 'Joshua', isAdmin: true, budget: 1000, playersRequired: 15, positionCounts: { GKP: 0, DEF: 0, MID: 0, FWD: 0 }, playersOwned: [] },
       { _id: 'bkNsCoQ4PAaqfkHvk371Foe4mAY2', email: 'marcusnnel@gmail.com', name: 'Marcus', isAdmin: false, budget: 1000, playersRequired: 15, positionCounts: { GKP: 0, DEF: 0, MID: 0, FWD: 0 }, playersOwned: [] },
-      { _id: '5kHk8rATvHZnP2AnH0AWddzreaJ3', email: 'jordanhaantjes@gmail.com', name: 'Jordan', isAdmin: false, budget: 1000, playersRequired: 15, positionCounts: { GKP: 0, DEF: 0, MID: 0, FWD: 0 }, playersOwned: [] },
-      { _id: 'IHbdoSsvGiWDZ6iz5tWUwOXibWE2', email: 'matthewcoltman13@gmail.com', name: 'Matthew', isAdmin: false, budget: 1000, playersRequired: 15, positionCounts: { GKP: 0, DEF: 0, MID: 0, FWD: 0 }, playersOwned: [] },
-      { _id: 'g3DLFGODHTVGEFIzckdQ2Pi87n83', email: 'antoniesmallsmith@gmail.com', name: 'Antonie', isAdmin: false, budget: 1000, playersRequired: 15, positionCounts: { GKP: 0, DEF: 0, MID: 0, FWD: 0 }, playersOwned: [] },
-      { _id: 'Z53R6llsyKfYoCogtUwuahmn8sJ2', email: 'leohenman2@gmail.com', name: 'Leo', isAdmin: false, budget: 1000, playersRequired: 15, positionCounts: { GKP: 0, DEF: 0, MID: 0, FWD: 0 }, playersOwned: [] },
-      { _id: 'wQxRQM0KRFVw5lgJPEkZasKLEZ32', email: 'kayle.tessendorf@gmail.com', name: 'Kayle', isAdmin: false, budget: 1000, playersRequired: 15, positionCounts: { GKP: 0, DEF: 0, MID: 0, FWD: 0 }, playersOwned: [] },
-      { _id: 'LiTo72DPI7gGYlj7quGAwOCRSux1', email: 'riccardovicente10@gmail.com', name: 'Riccardo', isAdmin: false, budget: 1000, playersRequired: 15, positionCounts: { GKP: 0, DEF: 0, MID: 0, FWD: 0 }, playersOwned: [] },
-      { _id: 'PFELQVetbkayGtcQW1I5dxFp0mA2', email: 'miko.smuts12@gmail.com', name: 'Miko', isAdmin: false, budget: 1000, playersRequired: 15, positionCounts: { GKP: 0, DEF: 0, MID: 0, FWD: 0 }, playersOwned: [] },
-      { _id: 'FyW01qVAZ2ecd7ZRbd1onGI46sw1', email: 'crew99free@gmail.com', name: 'Crew', isAdmin: false, budget: 1000, playersRequired: 15, positionCounts: { GKP: 0, DEF: 0, MID: 0, FWD: 0 }, playersOwned: [] }
+      { _id: 'MkEz9ZL3ZSUHnXAT5r5FuXbVhPc2', email: 'olinel94@gmail.com', name: 'Oli', isAdmin: false, budget: 1000, playersRequired: 15, positionCounts: { GKP: 0, DEF: 0, MID: 0, FWD: 0 }, playersOwned: [] },
+      { _id: 'HitpeICmQwfroQzYPdqbOH7g4eb2', email: 'lukeente09@gmail.com', name: 'Luke', isAdmin: false, budget: 1000, playersRequired: 15, positionCounts: { GKP: 0, DEF: 0, MID: 0, FWD: 0 }, playersOwned: [] },
+      { _id: '1DhUePmwlGYYXJLhRCApKiPRnQS2', email: 'duncan.jackson5@gmail.com', name: 'Duncan', isAdmin: false, budget: 1000, playersRequired: 15, positionCounts: { GKP: 0, DEF: 0, MID: 0, FWD: 0 }, playersOwned: [] },
+      { _id: '5UERkxB2wWR5JyueTAZqNIao5rM2', email: 'londwaskosana@gmail.com', name: 'Londwa', isAdmin: false, budget: 1000, playersRequired: 15, positionCounts: { GKP: 0, DEF: 0, MID: 0, FWD: 0 }, playersOwned: [] },
+      { _id: 'Pz5RV7TyfuZXBWAwUxakCEoea0G2', email: 'chambersian97@gmail.com', name: 'Ian', isAdmin: false, budget: 1000, playersRequired: 15, positionCounts: { GKP: 0, DEF: 0, MID: 0, FWD: 0 }, playersOwned: [] },
+      { _id: '000', email: '000', name: 'Kyle', isAdmin: false, budget: 1000, playersRequired: 15, positionCounts: { GKP: 0, DEF: 0, MID: 0, FWD: 0 }, playersOwned: [] },
+      { _id: '0000', email: '0000', name: 'Dean', isAdmin: false, budget: 1000, playersRequired: 15, positionCounts: { GKP: 0, DEF: 0, MID: 0, FWD: 0 }, playersOwned: [] }
+      //{ _id: '5kHk8rATvHZnP2AnH0AWddzreaJ3', email: 'jordanhaantjes@gmail.com', name: 'Jordan', isAdmin: false, budget: 1000, playersRequired: 15, positionCounts: { GKP: 0, DEF: 0, MID: 0, FWD: 0 }, playersOwned: [] },
+      //{ _id: 'IHbdoSsvGiWDZ6iz5tWUwOXibWE2', email: 'matthewcoltman13@gmail.com', name: 'Matthew', isAdmin: false, budget: 1000, playersRequired: 15, positionCounts: { GKP: 0, DEF: 0, MID: 0, FWD: 0 }, playersOwned: [] },
+      //{ _id: 'g3DLFGODHTVGEFIzckdQ2Pi87n83', email: 'antoniesmallsmith@gmail.com', name: 'Antonie', isAdmin: false, budget: 1000, playersRequired: 15, positionCounts: { GKP: 0, DEF: 0, MID: 0, FWD: 0 }, playersOwned: [] },
+      //{ _id: 'Z53R6llsyKfYoCogtUwuahmn8sJ2', email: 'leohenman2@gmail.com', name: 'Leo', isAdmin: false, budget: 1000, playersRequired: 15, positionCounts: { GKP: 0, DEF: 0, MID: 0, FWD: 0 }, playersOwned: [] },
+      //{ _id: 'wQxRQM0KRFVw5lgJPEkZasKLEZ32', email: 'kayle.tessendorf@gmail.com', name: 'Kayle', isAdmin: false, budget: 1000, playersRequired: 15, positionCounts: { GKP: 0, DEF: 0, MID: 0, FWD: 0 }, playersOwned: [] },
+      //{ _id: 'LiTo72DPI7gGYlj7quGAwOCRSux1', email: 'riccardovicente10@gmail.com', name: 'Riccardo', isAdmin: false, budget: 1000, playersRequired: 15, positionCounts: { GKP: 0, DEF: 0, MID: 0, FWD: 0 }, playersOwned: [] },
+      //{ _id: 'PFELQVetbkayGtcQW1I5dxFp0mA2', email: 'miko.smuts12@gmail.com', name: 'Miko', isAdmin: false, budget: 1000, playersRequired: 15, positionCounts: { GKP: 0, DEF: 0, MID: 0, FWD: 0 }, playersOwned: [] },
+      //{ _id: 'FyW01qVAZ2ecd7ZRbd1onGI46sw1', email: 'crew99free@gmail.com', name: 'Crew', isAdmin: false, budget: 1000, playersRequired: 15, positionCounts: { GKP: 0, DEF: 0, MID: 0, FWD: 0 }, playersOwned: [] }
     ];
 
     await Manager.deleteMany({});
