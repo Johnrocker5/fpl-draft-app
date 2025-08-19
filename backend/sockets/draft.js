@@ -235,7 +235,7 @@ function setupSockets(io) {
           }
           draftState.currentBid = bid;
           draftState.highestBidder = userId;
-          draftState.timer = Math.max(draftState.timer, 15);
+          draftState.timer = Math.max(draftState.timer, 10);
           console.log(`Bid placed: ${bid} by ${userId} on ${draftState.currentPlayer.web_name}, Timer reset to: ${draftState.timer}`);
           await saveDraftState();
           io.emit('draftState', draftState);
